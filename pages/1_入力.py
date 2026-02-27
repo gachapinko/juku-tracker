@@ -20,10 +20,34 @@ with col3:
 
 st.divider()
 
-# --- 各教科の単元プレビュー＋入力フォーム ---
-st.subheader("4教科の得点・平均点を入力")
+memo = st.text_input("📝 メモ（任意）", placeholder="例：算数は計算ミスが多かった。")
 
-subject_data = {}
+st.divider()
+st.subheader("教科ごとに入力して保存")
+
+def save_subject(subject, score, avg, max_s, std_dev):
+    existing = load_results()
+    dup = existing[
+        (existing["test_date"].astype(str) == str(test_date)) &
+        (existing["lesson_type"] == lesson_type) &
+        (existing["test_number"] == test_number) &
+        (existing["subject"] == subject)
+    ] if not existing.empty else pd.DataFrame()
+    if not dup.empty:
+        return "skipped"
+    add_result(
+        test_date=test_date,
+        lesson_type=lesson_type,
+        test_number=int(test_number),
+        subject=subject,
+        score=score,
+        average_score=avg,
+        max_score=max_s,
+        std_dev=std_dev,
+        memo=memo,
+    )
+    return "saved"
+
 for subject in SUBJECTS:
     units_df = get_units_for_test(subject, lesson_type, test_number)
 
@@ -38,7 +62,7 @@ for subject in SUBJECTS:
         else:
             st.caption("📌 単元データなし")
 
-        c1, c2, c3, c4 = st.columns([2, 2, 2, 2])
+        c1, c2, c3, c4, c5 = st.columns([2, 2, 2, 2, 1])
         with c1:
             score = st.number_input("得点", min_value=0.0, max_value=500.0, step=1.0,
                                     key=f"score_{subject}", format="%.0f")
@@ -51,49 +75,16 @@ for subject in SUBJECTS:
         with c4:
             std = st.number_input("標準偏差（任意）", min_value=0.0, max_value=200.0, step=0.1,
                                   value=0.0, key=f"std_{subject}", format="%.1f",
-                                  help="塾から入手できた場合のみ。空欄でもOK。")
-        subject_data[subject] = {
-            "score": score, "avg": avg, "max_s": max_s,
-            "std_dev": std if std > 0 else None,
-        }
-
-memo = st.text_area("📝 メモ（任意）", placeholder="例：算数は計算ミスが多かった。国語の時間が足りなかった。")
-
-st.divider()
-if st.button("💾 保存する", type="primary", use_container_width=True):
-    existing = load_results()
-    saved, skipped = [], []
-
-    for subject in SUBJECTS:
-        d = subject_data[subject]
-        dup = existing[
-            (existing["test_date"].astype(str) == str(test_date)) &
-            (existing["lesson_type"] == lesson_type) &
-            (existing["test_number"] == test_number) &
-            (existing["subject"] == subject)
-        ] if not existing.empty else pd.DataFrame()
-
-        if not dup.empty:
-            skipped.append(subject)
-            continue
-
-        add_result(
-            test_date=test_date,
-            lesson_type=lesson_type,
-            test_number=test_number,
-            subject=subject,
-            score=d["score"],
-            average_score=d["avg"],
-            max_score=d["max_s"],
-            std_dev=d["std_dev"],
-            memo=memo,
-        )
-        saved.append(subject)
-
-    if saved:
-        st.success(f"✅ 保存しました：{' / '.join(saved)}")
-    if skipped:
-        st.warning(f"⚠️ 既存データあり（スキップ）：{' / '.join(skipped)}")
+                                  help="塾から入手できた場合のみ。")
+        with c5:
+            st.write("")
+            st.write("")
+            if st.button("💾 保存", key=f"save_{subject}"):
+                result = save_subject(subject, score, avg, max_s, std if std > 0 else None)
+                if result == "saved":
+                    st.success("✅ 保存！")
+                else:
+                    st.warning("⚠️ 既存データあり")
 
 # --- 直近データ一覧 ---
 st.divider()
