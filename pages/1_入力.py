@@ -2,33 +2,34 @@ import streamlit as st
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from data_utils import SUBJECTS, LESSON_TYPES, add_result, load_results, get_units_for_test
+from data_utils import SUBJECTS, LESSON_TYPES, add_result, load_results, get_units_for_test, load_units
 import datetime
 import pandas as pd
 
 st.set_page_config(page_title="テスト結果入力", page_icon="✏️", layout="wide")
 st.title("✏️ テスト結果を入力する")
 
-# --- テスト選択 ---
-col1, col2, col3 = st.columns(3)
+# 講座種別ごとの最大講義数を取得
+units_df = load_units()
+
+col1, col2 = st.columns(2)
 with col1:
-    test_date = st.date_input("📅 テスト日", value=datetime.date.today())
+    lesson_type = st.selectbox("講座種別", LESSON_TYPES)
 with col2:
-    lesson_type = st.selectbox("📂 講座種別", LESSON_TYPES)
-with col3:
-    test_number = st.number_input("🔢 第○回", min_value=1, max_value=50, step=1, value=1)
+    # 講座種別に応じた講義No.の選択肢を生成
+    if not units_df.empty:
+        available_numbers = sorted(
+            units_df[units_df["lesson_type"] == lesson_type]["test_number"].unique().tolist()
+        )
+    else:
+        available_numbers = list(range(1, 45))
+    test_number = st.selectbox("講義No.", available_numbers)
 
 st.divider()
-
-memo = st.text_input("📝 メモ（任意）", placeholder="例：算数は計算ミスが多かった。")
-
-st.divider()
-st.subheader("教科ごとに入力して保存")
 
 def save_subject(subject, score, avg, max_s, std_dev):
     existing = load_results()
     dup = existing[
-        (existing["test_date"].astype(str) == str(test_date)) &
         (existing["lesson_type"] == lesson_type) &
         (existing["test_number"] == test_number) &
         (existing["subject"] == subject)
@@ -36,7 +37,7 @@ def save_subject(subject, score, avg, max_s, std_dev):
     if not dup.empty:
         return "skipped"
     add_result(
-        test_date=test_date,
+        test_date=datetime.date.today(),
         lesson_type=lesson_type,
         test_number=int(test_number),
         subject=subject,
@@ -44,17 +45,16 @@ def save_subject(subject, score, avg, max_s, std_dev):
         average_score=avg,
         max_score=max_s,
         std_dev=std_dev,
-        memo=memo,
+        memo="",
     )
     return "saved"
 
 for subject in SUBJECTS:
-    units_df = get_units_for_test(subject, lesson_type, test_number)
+    units_df_sub = get_units_for_test(subject, lesson_type, test_number)
 
     with st.expander(f"**{subject}**", expanded=True):
-        # 単元表示
-        if not units_df.empty:
-            for _, row in units_df.iterrows():
+        if not units_df_sub.empty:
+            for _, row in units_df_sub.iterrows():
                 unit_str = f"📌 **単元:** {row['unit_name']}"
                 if pd.notna(row.get('content')) and str(row.get('content')).strip():
                     unit_str += f"　／　{row['content']}"
@@ -91,12 +91,12 @@ st.divider()
 st.subheader("📋 直近の入力データ")
 df = load_results()
 if not df.empty:
-    show = df.sort_values("test_date", ascending=False).head(20).copy()
+    show = df.sort_values(["lesson_type","test_number"], ascending=False).head(20).copy()
     show["相対スコア"] = show.apply(
         lambda r: round((r["score"]/r["max_score"] - r["average_score"]/r["max_score"])*100 + 50, 1), axis=1
     )
-    show = show[["test_date","lesson_type","test_number","subject","score","average_score","max_score","相対スコア"]]
-    show.columns = ["日付","講座","回","教科","得点","平均点","満点","相対スコア"]
+    show = show[["lesson_type","test_number","subject","score","average_score","max_score","相対スコア"]]
+    show.columns = ["講座","講義No.","教科","得点","平均点","満点","相対スコア"]
     st.dataframe(show, use_container_width=True, hide_index=True)
 else:
     st.info("まだデータがありません。")
