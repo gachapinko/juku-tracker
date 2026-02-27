@@ -1,13 +1,12 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="塾テスト成績トラッカー",
+    page_title="juku-tracker",
     page_icon="📚",
     layout="wide",
 )
 
-st.title("📚 塾テスト成績トラッカー")
-st.caption("NOZOMI GAKUEN 小4 ベーシック講座 成績管理アプリ")
+st.title("📚 juku-tracker")
 
 col1, col2 = st.columns(2)
 with col1:
