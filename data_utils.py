@@ -66,6 +66,35 @@ def add_result(test_date, lesson_type, test_number, subject,
     }).execute()
 
 
+def upsert_result(test_date, lesson_type, test_number, subject,
+                  score, average_score, max_score, std_dev=None, memo=""):
+    """既存データがあれば上書き、なければ新規追加"""
+    sb = get_supabase()
+    res = sb.table("test_results").select("id") \
+        .eq("lesson_type", lesson_type) \
+        .eq("test_number", int(test_number)) \
+        .eq("subject", subject) \
+        .execute()
+    data = {
+        "test_date": str(test_date),
+        "lesson_type": lesson_type,
+        "test_number": int(test_number),
+        "subject": subject,
+        "score": float(score),
+        "average_score": float(average_score),
+        "max_score": float(max_score),
+        "std_dev": float(std_dev) if std_dev else None,
+        "memo": memo,
+    }
+    if res.data:
+        existing_id = res.data[0]["id"]
+        sb.table("test_results").update(data).eq("id", existing_id).execute()
+        return "updated"
+    else:
+        sb.table("test_results").insert(data).execute()
+        return "saved"
+
+
 def delete_result(result_id: int):
     sb = get_supabase()
     sb.table("test_results").delete().eq("id", result_id).execute()
