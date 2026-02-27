@@ -36,7 +36,7 @@ subj_stats = df.groupby("subject").agg(
 ).reset_index()
 subj_stats = subj_stats.sort_values("avg_relative")
 
-COLORS = {"国語": "#3B82F6", "算数": "#EF4444", "理科": "#10B981", "社会": "#F59E0B"}
+COLORS = {"国語": "#EF4444", "算数": "#3B82F6", "理科": "#10B981", "社会": "#F59E0B"}
 fig_bar = go.Figure()
 fig_bar.add_trace(go.Bar(
     x=subj_stats["subject"],

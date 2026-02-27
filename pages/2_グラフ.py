@@ -38,7 +38,7 @@ df = df[df["lesson_type"].isin(selected_types)].copy()
 df["x_label"] = df.apply(lambda r: f"{r['lesson_type']} 第{int(r['test_number'])}回", axis=1)
 df = df.sort_values(["test_date", "test_number"])
 
-COLORS = {"国語": "#3B82F6", "算数": "#EF4444", "理科": "#10B981", "社会": "#F59E0B"}
+COLORS = {"国語": "#EF4444", "算数": "#3B82F6", "理科": "#10B981", "社会": "#F59E0B"}
 
 # --- 全教科まとめ ---
 st.subheader("全教科の推移")
