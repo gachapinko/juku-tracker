@@ -4,6 +4,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from data_utils import SUBJECTS, LESSON_TYPES, add_result, load_results, get_units_for_test
 import datetime
+import pandas as pd
 
 st.set_page_config(page_title="テスト結果入力", page_icon="✏️", layout="wide")
 st.title("✏️ テスト結果を入力する")
@@ -56,7 +57,6 @@ for subject in SUBJECTS:
             "std_dev": std if std > 0 else None,
         }
 
-import pandas as pd
 memo = st.text_area("📝 メモ（任意）", placeholder="例：算数は計算ミスが多かった。国語の時間が足りなかった。")
 
 st.divider()
