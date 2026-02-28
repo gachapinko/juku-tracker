@@ -6,6 +6,12 @@ from data_utils import SUBJECTS, load_results, enrich_results
 import plotly.graph_objects as go
 
 st.set_page_config(page_title="成績グラフ", page_icon="📈", layout="wide")
+st.markdown("""
+<style>
+h1 { font-size: 1.6rem !important; }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("📈 成績グラフ")
 
 df_raw = load_results()

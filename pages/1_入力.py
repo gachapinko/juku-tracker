@@ -7,6 +7,12 @@ import datetime
 import pandas as pd
 
 st.set_page_config(page_title="テスト結果入力", page_icon="✏️", layout="wide")
+st.markdown("""
+<style>
+h1 { font-size: 1.6rem !important; }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("✏️ テスト結果を入力する")
 
 # 講座種別ごとの講義No.を取得

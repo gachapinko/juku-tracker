@@ -5,6 +5,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from data_utils import SUBJECTS, LESSON_TYPES, load_units
 
 st.set_page_config(page_title="単元一覧", page_icon="📋", layout="wide")
+st.markdown("""
+<style>
+h1 { font-size: 1.6rem !important; }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("📋 単元一覧")
 st.caption("画像から取り込んだ単元データです。テスト結果入力時にも参照されます。")
 

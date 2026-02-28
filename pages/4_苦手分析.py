@@ -8,6 +8,12 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 st.set_page_config(page_title="苦手分析", page_icon="🔍", layout="wide")
+st.markdown("""
+<style>
+h1 { font-size: 1.6rem !important; }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("🔍 苦手単元を分析する")
 
 df_raw = load_results()

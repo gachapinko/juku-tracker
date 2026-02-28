@@ -1,12 +1,19 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="juku-tracker",
+    page_title="塾テスト成績トラッカー",
     page_icon="📚",
     layout="wide",
 )
 
-st.title("📚 juku-tracker")
+# 全ページ共通：タイトルサイズを小さく
+st.markdown("""
+<style>
+h1 { font-size: 1.6rem !important; }
+</style>
+""", unsafe_allow_html=True)
+
+st.title("📚 塾テスト成績トラッカー")
 
 col1, col2 = st.columns(2)
 with col1:
